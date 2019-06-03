@@ -34,6 +34,7 @@ class Spaceship
         this.translationZ = translationZ;
     }
 
+
     //-------------------------------------------------------- Moving --------//
     void applyForceInDirection(final float directionX,
                                final float directionY,
@@ -80,8 +81,11 @@ class Spaceship
 
 
     //============================================================== Data ====//
+    //--------------------------------------------------------- Model --------//
     private PShape model;
 
+
+    //--------------------------------------- Initial transformations --------//
     private float scaleXYZ;
 
     private float rotationInRadiansX;
@@ -92,15 +96,20 @@ class Spaceship
     private float translationY;
     private float translationZ;
 
+
+    //------------------------------------------------------- Physics --------//
     private float accelerationX;
     private float accelerationY;
     private float accelerationZ;
+
     private float velocityX;
     private float velocityY;
     private float velocityZ;
+
     private float positionX;
     private float positionY;
     private float positionZ;
+
 
 }
 
