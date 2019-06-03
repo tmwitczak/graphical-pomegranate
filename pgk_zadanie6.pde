@@ -33,6 +33,24 @@ class Spaceship
         this.translationY = translationY;
         this.translationZ = translationZ;
     }
+
+
+    //----------------------------------------------------- Rendering --------//
+    void render()
+    {
+        pushMatrix();
+        {
+            scale(scaleXYZ);
+            
+            rotateX(rotationInRadiansX);
+            rotateY(rotationInRadiansY);
+            rotateZ(rotationInRadiansZ);
+
+            translate(translationX, translationY, translationZ);
+
+            shape(model);
+        }
+        popMatrix();
     }
 
 
