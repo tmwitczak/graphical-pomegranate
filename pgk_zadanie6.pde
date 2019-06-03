@@ -82,25 +82,25 @@ class Spaceship
     //============================================================== Data ====//
     private PShape model;
 
-    float scaleXYZ;
+    private float scaleXYZ;
 
-    float rotationInRadiansX;
-    float rotationInRadiansY;
-    float rotationInRadiansZ;
+    private float rotationInRadiansX;
+    private float rotationInRadiansY;
+    private float rotationInRadiansZ;
 
-    float translationX;
-    float translationY;
-    float translationZ;
+    private float translationX;
+    private float translationY;
+    private float translationZ;
 
-    float accelerationX;
-    float accelerationY;
-    float accelerationZ;
-    float velocityX;
-    float velocityY;
-    float velocityZ;
-    float positionX;
-    float positionY;
-    float positionZ;
+    private float accelerationX;
+    private float accelerationY;
+    private float accelerationZ;
+    private float velocityX;
+    private float velocityY;
+    private float velocityZ;
+    private float positionX;
+    private float positionY;
+    private float positionZ;
 
 }
 
