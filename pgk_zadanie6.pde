@@ -82,6 +82,11 @@ void setup()
     deer = loadShape("deer.obj");
     capsule = loadShape("capsule.obj");
 
+    spaceship = new Spaceship("SpaceShip.obj",
+                              50.0f,
+                              TWO_PI / -48.0f, TWO_PI / 2.0f, TWO_PI / 2.0f,
+                              0.0f, -2.0f, -4.0f);
+
     colors = new color[12];
     colors[0] = #ff0000;
     colors[1] = #00ff00;
@@ -126,6 +131,11 @@ void draw()
         emissive(sun.getColor());
         sun.draw();
     }
+    popMatrix();
+
+    pushMatrix();
+        translateCenter();
+        spaceship.render();
     popMatrix();
 
     // Draw first planet
@@ -342,6 +352,8 @@ int framerate = 60;
 CelestialBody sun;
 CelestialBody[] planets;
 CelestialBody[] moons;
+
+Spaceship spaceship;
 
 ///////////////////////////////////////////////////////////////////// Classes //
 class CelestialBody
