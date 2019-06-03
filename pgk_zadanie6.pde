@@ -9,15 +9,45 @@ class Spaceship
 {
     //========================================================= Behaviour ====//
     //-------------------------------------------------- Constructors --------//
-    Spaceship(final String modelFilename)
+    Spaceship(final String modelFilename,
+
+              float scaleXYZ,
+
+              float rotationInRadiansX,
+              float rotationInRadiansY,
+              float rotationInRadiansZ,
+              
+              float translationX,
+              float translationY,
+              float translationZ)
     {
-        model = loadShape(modelFilename);
+        this.model = loadShape(modelFilename);
+
+        this.scaleXYZ = scaleXYZ;
+
+        this.rotationInRadiansX = rotationInRadiansX;
+        this.rotationInRadiansY = rotationInRadiansY;
+        this.rotationInRadiansZ = rotationInRadiansZ;
+
+        this.translationX = translationX;
+        this.translationY = translationY;
+        this.translationZ = translationZ;
+    }
     }
 
 
     //============================================================== Data ====//
     private PShape model;
 
+    float scaleXYZ;
+
+    float rotationInRadiansX;
+    float rotationInRadiansY;
+    float rotationInRadiansZ;
+
+    float translationX;
+    float translationY;
+    float translationZ;
 
 }
 
