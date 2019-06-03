@@ -133,11 +133,6 @@ void draw()
     }
     popMatrix();
 
-    pushMatrix();
-        translateCenter();
-        spaceship.render();
-    popMatrix();
-
     // Draw first planet
     pushMatrix();
     {
@@ -333,6 +328,13 @@ void draw()
     }
     popMatrix();
 
+    // Draw spaceship
+    pushMatrix();
+    {
+        translateCenter();
+        spaceship.render();
+    }
+    popMatrix();
     // Update position
     for (CelestialBody planet : planets)
         planet.updateAngle();
