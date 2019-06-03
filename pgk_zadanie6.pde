@@ -34,6 +34,30 @@ class Spaceship
         this.translationZ = translationZ;
     }
 
+    //-------------------------------------------------------- Moving --------//
+    void applyForceInDirection(final float directionX,
+                               final float directionY,
+                               final float directionZ,
+                               final float force)
+    {
+        // Assume mass is equal to 1 for now
+        final float mass = 1.0f;
+
+        accelerationX = (force / mass) * directionX;
+        accelerationY = (force / mass) * directionY;
+        accelerationZ = (force / mass) * directionZ;
+    }
+
+    void update(final float deltaTime)
+    {
+        velocityX += accelerationX * deltaTime;
+        velocityY += accelerationY * deltaTime;
+        velocityZ += accelerationZ * deltaTime;
+
+        positionX += velocityX * deltaTime;
+        positionY += velocityY * deltaTime;
+        positionZ += velocityZ * deltaTime;
+    }
 
     //----------------------------------------------------- Rendering --------//
     void render()
@@ -47,6 +71,7 @@ class Spaceship
             rotateZ(rotationInRadiansZ);
 
             translate(translationX, translationY, translationZ);
+            translate(positionX, positionY, positionZ);
 
             shape(model);
         }
@@ -66,6 +91,16 @@ class Spaceship
     float translationX;
     float translationY;
     float translationZ;
+
+    float accelerationX;
+    float accelerationY;
+    float accelerationZ;
+    float velocityX;
+    float velocityY;
+    float velocityZ;
+    float positionX;
+    float positionY;
+    float positionZ;
 
 }
 
