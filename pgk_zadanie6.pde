@@ -3,6 +3,24 @@
 // > Task 6
 // Tomasz Witczak, 216920
 
+
+///////////////////////////////////////////////////////////// | Class: Spaceship
+class Spaceship
+{
+    //============================================================ | Behaviour <
+    Spaceship(final String modelFilename)
+    {
+        model = loadShape(modelFilename);
+    }
+
+
+    //================================================================= | Data <
+    private PShape model;
+
+
+}
+
+
 ///////////////////////////////////////////////////////////////// | Main program
 void setup()
 {
