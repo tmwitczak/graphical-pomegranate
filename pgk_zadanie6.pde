@@ -89,6 +89,15 @@ class Spaceship
         popMatrix();
     }
 
+    void updateRotation(final float deltaRotationX,
+                        final float deltaRotationY,
+                        final float deltaRotationZ)
+    {
+        rotationInRadiansX += deltaRotationX;   
+        rotationInRadiansY += deltaRotationY;
+        rotationInRadiansZ += deltaRotationZ;
+    }
+
     void setCamera()
     {
         PVector yRotated = cameraMatrix.mult(new PVector(0.0f, 1.0f, 0.0f),
@@ -187,6 +196,7 @@ void setup()
     noStroke();
 
     spaceImage = loadImage("space-1280-720.png");
+    hyperspace = loadImage("hyperspace.png");
 
     deer = loadShape("deer.obj");
     capsule = loadShape("capsule.obj");
@@ -232,6 +242,8 @@ void setup()
 
 void draw()
 {
+    background(spaceImage);
+
     // > Events and physics
     // Rotate viewport
     if (mousePressed)
@@ -263,6 +275,28 @@ void draw()
             spaceship.applyForce(force);
         }
 
+        if (key == CODED && keyCode == LEFT)
+        {
+            spaceship.updateRotation(0.0f, 0.0f,  -0.25f * TWO_PI / frameRate);
+        }
+
+        if (key == CODED && keyCode == RIGHT)
+        {
+            spaceship.updateRotation(0.0f, 0.0f,  0.25f * TWO_PI / frameRate);
+        }
+
+        if (key == 'x')
+        {
+            PVector direction = new PVector(0.0f, 0.0f, 1.0f);
+
+            background(hyperspace);
+
+            PVector force = cameraMatrix.mult(direction, null)
+                                        .setMag(10000.0f);
+
+            spaceship.applyForce(force);
+        }
+
         if (key == ' ')
         {
             PVector position = spaceship.position.copy().add(cameraDirection().normalize().mult(200.0f));
@@ -273,7 +307,6 @@ void draw()
     }
 
     // Start drawing
-    background(spaceImage);
     spaceship.setCamera(); 
 
     // Draw sun
@@ -527,6 +560,7 @@ void draw()
 /////////////////////////////////////////////////////////////////// Variables //
 color[] colors;
 PImage spaceImage;
+PImage hyperspace;
 
 PShape deer, capsule;
 
