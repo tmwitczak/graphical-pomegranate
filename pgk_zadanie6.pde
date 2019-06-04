@@ -32,32 +32,43 @@ class Spaceship
         this.translationX = translationX;
         this.translationY = translationY;
         this.translationZ = translationZ;
+
+        resultantForce = new PVector(0.0f, 0.0f, 0.0f);
+        acceleration = new PVector(0.0f, 0.0f, 0.0f);
+        velocity = new PVector(0.0f, 0.0f, 0.0f);
+        position = new PVector(0.0f, 0.0f, 0.0f);
     }
 
 
     //-------------------------------------------------------- Moving --------//
-    void applyForceInDirection(final float directionX,
-                               final float directionY,
-                               final float directionZ,
-                               final float force)
+    void applyForce(final PVector force)
     {
-        // Assume mass is equal to 1 for now
-        final float mass = 1.0f;
-
-        accelerationX = (force / mass) * directionX;
-        accelerationY = (force / mass) * directionY;
-        accelerationZ = (force / mass) * directionZ;
+        resultantForce.add(force);
     }
 
     void update(final float deltaTime)
     {
-        velocityX += accelerationX * deltaTime;
-        velocityY += accelerationY * deltaTime;
-        velocityZ += accelerationZ * deltaTime;
+        // Assume mass is equal to 1
+        final float mass = 1.0f;
+        PVector friction = velocity.copy();
 
-        positionX += velocityX * deltaTime;
-        positionY += velocityY * deltaTime;
-        positionZ += velocityZ * deltaTime;
+        if (velocity.mag() > 0.0f)
+        {
+            friction.mult(-1.0f)
+                    .setMag(10.0f);
+
+            float previousMagnitude = velocity.mag();
+            velocity.add(friction);
+            float currentMagnitude = velocity.mag();
+            if (currentMagnitude >= previousMagnitude)
+                velocity.mult(0.0f);
+    }
+
+        acceleration = PVector.div(resultantForce, mass);
+        velocity.add(PVector.mult(acceleration, deltaTime));
+        position.add(PVector.mult(velocity, deltaTime));
+
+        resultantForce.mult(0.0f);
     }
 
     //----------------------------------------------------- Rendering --------//
@@ -72,11 +83,34 @@ class Spaceship
             rotateZ(rotationInRadiansZ);
 
             translate(translationX, translationY, translationZ);
-            translate(positionX, positionY, positionZ);
 
             shape(model);
         }
         popMatrix();
+    }
+
+    void setCamera()
+    {
+        PVector x = new PVector(1.0f, 0.0f, 0.0f);
+        PVector y = new PVector(0.0f, 1.0f, 0.0f);
+
+        PVector xRotated = cameraMatrix.mult(x, null);
+        PVector yRotated = cameraMatrix.mult(y, null);
+
+        PVector direction = xRotated.cross(yRotated)
+                                    .setMag(750.0f);
+
+        camera(position.x,
+               position.y,
+               position.z - 750.0f,
+
+               position.x + direction.x,
+               position.y + direction.y,
+               position.z + direction.z,
+
+               yRotated.x,
+               yRotated.y,
+               yRotated.z);
     }
 
 
@@ -98,17 +132,10 @@ class Spaceship
 
 
     //------------------------------------------------------- Physics --------//
-    private float accelerationX;
-    private float accelerationY;
-    private float accelerationZ;
-
-    private float velocityX;
-    private float velocityY;
-    private float velocityZ;
-
-    private float positionX;
-    private float positionY;
-    private float positionZ;
+    private PVector resultantForce;
+    private PVector acceleration;
+    private PVector velocity;
+    private PVector position;
 
 
 }
@@ -128,8 +155,12 @@ void setup()
 
     spaceship = new Spaceship("SpaceShip.obj",
                               50.0f,
-                              TWO_PI / -48.0f, TWO_PI / 2.0f, TWO_PI / 2.0f,
-                              0.0f, -2.0f, -4.0f);
+                              TWO_PI / -48.0f,
+                              TWO_PI / 2.0f,
+                              TWO_PI / 2.0f,
+                              0.0f,
+                              -2.0f, 
+                              -4.0f);
 
     colors = new color[12];
     colors[0] = #ff0000;
@@ -163,7 +194,41 @@ void setup()
 
 void draw()
 {
+    // > Events and physics
+    // Rotate viewport
+    if (mousePressed)
+    {
+        cameraMatrix.rotateX(-(mouseY - height / 2.0) / height / 20);
+        cameraMatrix.rotateY(-(mouseX - width  / 2.0) / width  / 20);
+    }
+
+    // Fly the spaceship
+    if (keyPressed)
+    {
+        if (key == CODED && keyCode == UP)
+        {
+            PVector direction = new PVector(0.0f, 0.0f, 1.0f);
+
+            PVector force = cameraMatrix.mult(direction, null)
+                                        .setMag(1000.0f);
+
+            spaceship.applyForce(force);
+        }
+
+        if (key == CODED && keyCode == DOWN)
+        {
+            PVector direction = new PVector(0.0f, 0.0f, -1.0f);
+
+            PVector force = cameraMatrix.mult(direction, null)
+                                        .setMag(1000.0f);
+
+            spaceship.applyForce(force);
+        }
+    }
+
+    // Start drawing
     background(spaceImage); 
+    spaceship.setCamera(); 
 
     // Draw sun
     pushMatrix();
@@ -375,16 +440,29 @@ void draw()
     // Draw spaceship
     pushMatrix();
     {
+        camera(0.0f, 0.0f, 750.0f,
+               0.0f, 0.0f, 0.0f,
+               0.0f, 1.0f, 0.0f);
+
         translateCenter();
+
+        emissive(0);
+        specular(255, 255, 255);
+        shininess(1000);
+
         spaceship.render();
     }
     popMatrix();
-    // Update position
+
+    // Update positions of planets
     for (CelestialBody planet : planets)
         planet.updateAngle();
         
     for (CelestialBody moon : moons)
         moon.updateAngle();
+
+    // Update position of spaceship
+    spaceship.update(1.0f / frameRate);
 }
 
 /////////////////////////////////////////////////////////////////// Variables //
@@ -398,6 +476,8 @@ int framerate = 60;
 CelestialBody sun;
 CelestialBody[] planets;
 CelestialBody[] moons;
+
+PMatrix3D cameraMatrix = new PMatrix3D();
 
 Spaceship spaceship;
 
@@ -470,7 +550,7 @@ class CelestialBody
 //////////////////////////////////////////////////////////// Helper functions //
 void translateCenter()
 {
-    translate(width / 2, height / 2);
+    //translate(width / 2, height / 2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
