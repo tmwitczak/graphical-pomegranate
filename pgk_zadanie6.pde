@@ -62,7 +62,7 @@ class Spaceship
             float currentMagnitude = velocity.mag();
             if (currentMagnitude >= previousMagnitude)
                 velocity.mult(0.0f);
-    }
+        }
 
         acceleration = PVector.div(resultantForce, mass);
         velocity.add(PVector.mult(acceleration, deltaTime));
@@ -91,18 +91,13 @@ class Spaceship
 
     void setCamera()
     {
-        PVector x = new PVector(1.0f, 0.0f, 0.0f);
-        PVector y = new PVector(0.0f, 1.0f, 0.0f);
-
-        PVector xRotated = cameraMatrix.mult(x, null);
-        PVector yRotated = cameraMatrix.mult(y, null);
-
-        PVector direction = xRotated.cross(yRotated)
-                                    .setMag(750.0f);
+        PVector yRotated = cameraMatrix.mult(new PVector(0.0f, 1.0f, 0.0f),
+                                             null);
+        PVector direction = cameraDirection();
 
         camera(position.x,
                position.y,
-               position.z - 750.0f,
+               position.z,// - 750.0f,
 
                position.x + direction.x,
                position.y + direction.y,
@@ -135,11 +130,54 @@ class Spaceship
     private PVector resultantForce;
     private PVector acceleration;
     private PVector velocity;
-    private PVector position;
+    PVector position;
 
 
 }
 
+/////////////////////////////////////////////////////////////// Class: Bullet //
+class Bullet
+{
+    Bullet(final PVector velocity,
+           final PVector position)
+    {
+        this.velocity = velocity.copy();
+        this.position = position.copy();
+    }
+
+    void render()
+    {
+        pushMatrix();
+        {
+            fill(colors[7]);
+            translate(position.x, position.y, position.z);
+            sphere(10.0f);
+        }
+        popMatrix();
+    }
+
+    void update(final float deltaTime)
+    {
+        position.add(PVector.mult(velocity, deltaTime));
+    }
+
+    private PVector velocity;
+    private PVector position;
+}
+
+PVector cameraDirection()
+{
+    PVector x = new PVector(1.0f, 0.0f, 0.0f);
+    PVector y = new PVector(0.0f, 1.0f, 0.0f);
+
+    PVector xRotated = cameraMatrix.mult(x, null);
+    PVector yRotated = cameraMatrix.mult(y, null);
+
+    PVector direction = xRotated.cross(yRotated)
+                                .setMag(750.0f);
+
+    return direction;
+}
 
 //////////////////////////////////////////////////////////////// Main program //
 void setup()
@@ -198,8 +236,8 @@ void draw()
     // Rotate viewport
     if (mousePressed)
     {
-        cameraMatrix.rotateX(-(mouseY - height / 2.0) / height / 20);
-        cameraMatrix.rotateY(-(mouseX - width  / 2.0) / width  / 20);
+        cameraMatrix.rotateX(-0.05 * (mouseY - height / 2.0) / height);
+        cameraMatrix.rotateY(-0.05 * (mouseX - width  / 2.0) / width);
     }
 
     // Fly the spaceship
@@ -224,10 +262,18 @@ void draw()
 
             spaceship.applyForce(force);
         }
+
+        if (key == ' ')
+        {
+            PVector position = spaceship.position.copy().add(cameraDirection().normalize().mult(200.0f));
+            PVector velocity = cameraDirection().setMag(200.0f);
+            bullet = new Bullet(velocity,
+                                position);
+        }
     }
 
     // Start drawing
-    background(spaceImage); 
+    background(spaceImage);
     spaceship.setCamera(); 
 
     // Draw sun
@@ -454,6 +500,16 @@ void draw()
     }
     popMatrix();
 
+    // Draw bullet
+    pushMatrix();
+    {
+        if (bullet != null)
+        {
+            bullet.render();
+        }
+    }
+    popMatrix();
+
     // Update positions of planets
     for (CelestialBody planet : planets)
         planet.updateAngle();
@@ -461,8 +517,11 @@ void draw()
     for (CelestialBody moon : moons)
         moon.updateAngle();
 
-    // Update position of spaceship
+    // Update position of spaceship and bullet
     spaceship.update(1.0f / frameRate);
+
+    if (bullet != null)
+        bullet.update(1.0f / frameRate);
 }
 
 /////////////////////////////////////////////////////////////////// Variables //
@@ -476,6 +535,7 @@ int framerate = 60;
 CelestialBody sun;
 CelestialBody[] planets;
 CelestialBody[] moons;
+Bullet bullet;
 
 PMatrix3D cameraMatrix = new PMatrix3D();
 
@@ -532,11 +592,6 @@ class CelestialBody
                     scale(bodyScale);
                     shape(capsule, 0, 0);
                 }
-                // for (int i = 0; i < sides; i++)
-                //     vertex(bodyScale * cos(TWO_PI * (float)i / float(sides)),
-                //            bodyScale * sin(TWO_PI * (float)i / float(sides)));
-            // }
-            // endShape(CLOSE);
         }
         popMatrix();
     }
